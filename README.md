@@ -16,6 +16,7 @@ import torch
 import torch.nn as nn
 
 class Ant(nn.Module):
+    """Signal attenuation function: x * exp(-|x|/t)"""    
     def __init__(self, init_pos=6.0, init_neg=6.0):
         super().__init__()
         self.tau_pos = init_pos
