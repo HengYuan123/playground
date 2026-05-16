@@ -16,22 +16,14 @@ import torch
 import torch.nn as nn
 
 class Ant(nn.Module):
-    """Signal attenuation function: x * exp(-|x|/t)"""    
-    def __init__(self, t=6.0):
-        """
-        Args:
-        - t: float, attenuation rate (default: 6.0)
-        """
+    def __init__(self, init_pos=6.0, init_neg=6.0):
         super().__init__()
-        self.t = t
+        self.tau_pos = init_pos
+        self.tau_neg = init_neg
 
     def forward(self, x):
-        # Core computation
-        y = x * torch.exp(-torch.abs(x) / self.t)
-        return y
-
-    def extra_repr(self):
-        return f"t={self.t}"
+        tau = torch.where(x >= 0, self.tau_pos, self.tau_neg)
+        return x * torch.exp(-torch.abs(x) / tau)
 ```
 ## TensorFlow Implementation
 ```
@@ -40,26 +32,14 @@ from tensorflow.keras.layers import Layer
 
 class Ant(Layer):
     """Signal attenuation function: x * exp(-|x|/t)"""    
-    def __init__(self, t=6.0, **kwargs):
-        """
-        Args:
-        - t: float, attenuation rate (default: 6.0)
-        """
-        super(Ant, self).__init__(**kwargs)
-        self.t = float(t)
-        
-    def call(self, inputs):
-        # Core computation
-        y = inputs * tf.exp(-tf.abs(inputs) / self.t)
-        return y
-    
-    def get_config(self):
-        """Get layer configuration for serialization"""
-        config = super(Ant, self).get_config()
-        config.update({
-            "t": self.t
-        })
-        return config
+    def __init__(self, init_pos=6.0, init_neg=6.0):
+        super().__init__()
+        self.tau_pos = tf.constant(init_pos, dtype=tf.float32)
+        self.tau_neg = tf.constant(init_neg, dtype=tf.float32)
+
+    def call(self, x):
+        tau = tf.where(x >= 0, self.tau_pos, self.tau_neg)
+        return x * tf.exp(-tf.abs(x) / tau)
 ```
 ## Citation：
 ```
